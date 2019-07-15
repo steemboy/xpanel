@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/accessibility"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Switch
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="40dp" />
+        <TextView
+            android:text="@string/str_accessibility"
+            android:layout_marginStart="5dp"
+            android:textSize="8pt"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/alert"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Switch
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="40dp" />
+        <TextView
+            android:text="@string/str_alert"
+            android:layout_marginStart="5dp"
+            android:textSize="8pt"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/admin"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Switch
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="40dp" />
+        <TextView
+            android:text="@string/str_admin"
+            android:layout_marginStart="5dp"
+            android:textSize="8pt"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/access_usage"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Switch
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="40dp" />
+        <TextView
+            android:text="@string/str_statusage"
+            android:layout_marginStart="5dp"
+            android:textSize="8pt"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </LinearLayout>
+</LinearLayout>

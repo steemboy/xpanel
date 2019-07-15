@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">xPanel</string>
+
+    <string name="accessibility_service_description">Это сервис для работы приложения xPanel</string>
+
+    <string name="place_not_found">Не найдено данных о погоде</string>
+    <string name="no_gesture">Действие не выбранно</string>
+    <string name="left_gesture">Дейстие при свайпе влево</string>
+    <string name="upleft_gesture">Дейстие при свайпе влево-вверх</string>
+    <string name="up_gesture">Дейстие при свайпе вверх</string>
+    <string name="upright_gesture">Дейстие при свайпе вправо-вверх</string>
+    <string name="right_gesture">Дейстие при свайпе вправо</string>
+    <string name="tap_gesture">Дейстие при клике</string>
+    <string name="dtap_gesture">Дейстие при двойном клике</string>
+    <string name="ltap_gesture">Дейстие при долгом нажатии</string>
+    <string name="str_accessibility">Запуск/остановка сервисв</string>
+    <string name="str_alert">Разрещение на создание элементов интерфейса по верх других окон</string>
+    <string name="str_admin">Разрещение на получение роли администратора устройства</string>
+    <string name="str_statusage">Разрещение на получение статистики использования приложений</string>
+    <string name="select_app">Выберите приложение</string>
+    <string name="str_writesettings">Разрешени для изменения настроек яркости</string>
+</resources>

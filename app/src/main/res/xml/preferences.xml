@@ -1,0 +1,74 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:example="http://schemas.android.com/apk/res/arca.xpanel">
+    <PreferenceCategory android:title="Настройки">
+        <arca.xpanel.custome_interfaces.MyListPreference
+            android:key="color"
+            android:title="Цвет"
+            android:summary="White"
+            android:icon="@drawable/ic_action_color"
+            android:entries="@array/colors_material_names"
+            android:entryValues="@array/colors_material"
+            android:defaultValue="#ffffffff"/>
+        <CheckBoxPreference
+            android:key="shadow"
+            android:icon="@drawable/ic_action_shadow"
+            android:summaryOff="Тень выключена"
+            android:summaryOn="Тень включена"
+            android:defaultValue="false"
+            android:title="Тень"/>
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="shadow_power"
+            android:icon="@drawable/ic_action_shadowpower"
+            android:title="Размах тени"
+            android:defaultValue="5"
+            example:minValue="0"
+            example:maxValue="20"
+            android:dependency="shadow" />
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="width"
+            android:icon="@drawable/ic_action_width"
+            android:title="Ширина"
+            android:defaultValue="100"
+            example:minValue="50"
+            example:maxValue="1000"/>
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="height"
+            android:icon="@drawable/ic_action_heigth"
+            android:title="Высота"
+            android:defaultValue="30"
+            example:minValue="10"
+            example:maxValue="100"/>
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="margin"
+            android:icon="@drawable/ic_action_margin"
+            android:title="Отступ от края экрана"
+            android:defaultValue="5"
+            example:minValue="0"
+            example:maxValue="100"/>
+        <arca.xpanel.custome_interfaces.MyListPreference
+            android:key="gravity"
+            android:title="Расположение"
+            android:summary="По центру"
+            android:icon="@drawable/ic_action_gravity"
+            android:entries="@array/gravity"
+            android:entryValues="@array/indexes"
+            android:defaultValue="1"/>
+        <CheckBoxPreference
+            android:key="vibrate"
+            android:icon="@drawable/ic_action_vibration"
+            android:summaryOff="Вибрация отключена"
+            android:summaryOn="Вибрация включена"
+            android:defaultValue="true"
+            android:title="Вибрация"/>
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="vibrate_start_power"
+            android:title="Сила вибрации в начале жеста"
+            android:dependency="vibrate"
+            android:defaultValue="5"/>
+        <arca.xpanel.custome_interfaces.SeekBarPreference
+            android:key="vibrate_end_power"
+            android:title="Сила вибрации в конце жеста"
+            android:dependency="vibrate"
+            android:defaultValue="5"/>
+    </PreferenceCategory>
+</PreferenceScreen>
