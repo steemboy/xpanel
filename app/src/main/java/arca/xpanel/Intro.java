@@ -6,11 +6,12 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -122,7 +123,7 @@ public class Intro extends AppCompatActivity implements pages.callback {
         }
 
         @Override
-        public android.support.v4.app.Fragment getItem(int position) {
+        public Fragment getItem(int position) {
             return o.get(position);
         }
     }

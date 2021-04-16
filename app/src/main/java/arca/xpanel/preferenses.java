@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import arca.xpanel.custome_interfaces.SeekBarPreference;
 import arca.xpanel.services.service_accessibility;

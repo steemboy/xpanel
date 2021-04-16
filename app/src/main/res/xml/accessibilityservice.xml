@@ -1,4 +1,6 @@
-<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-                       android:description="@string/accessibility_service_description"
-                       android:packageNames="com.leo.xpanel"
-                       android:settingsActivity="com.leo.xpanel.xPanel" />
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityFlags="flagDefault"
+    android:description="@string/accessibility_service_description"
+    android:packageNames="com.leo.xpanel"
+    android:settingsActivity="com.leo.xpanel.xPanel" />

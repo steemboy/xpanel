@@ -1,20 +1,23 @@
 package arca.xpanel.services;
 
 import android.accessibilityservice.AccessibilityService;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Vibrator;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GestureDetectorCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GestureDetectorCompat;
+
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -23,7 +26,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import arca.xpanel.R;
@@ -32,13 +34,13 @@ import arca.xpanel.custome_interfaces.FancyToast;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static arca.xpanel.singleton.app;
 
-public class service_accessibility extends AccessibilityService implements View.OnTouchListener, AppOpsManager.OnOpChangedListener {
+public class service_accessibility extends AccessibilityService implements View.OnTouchListener, AppOpsManager.OnOpChangedListener, ValueAnimator.AnimatorUpdateListener {
     public static boolean isEnabled = false;
     private boolean torch = false;
     private String no_action;
-    private LinearLayout ll;
     private WindowManager wm;
     private Vibrator vibrator;
+    private final DisplayMetrics dm = new DisplayMetrics();
     private GestureDetectorCompat detector;
     private WindowManager.LayoutParams params;
     public static final String ACTION_UPDATE_SERVICE = "update-update";
@@ -46,16 +48,17 @@ public class service_accessibility extends AccessibilityService implements View.
     public static final String EXTRA_PARAM = "extra_par";
     private Intent cameraIntent;
     private Button b;
-    private LinearLayout.LayoutParams lllp;
+    private int defX;
+    private int defY;
 
     private boolean shadow = false;
     private int s_power = 0;
     private boolean vibrate = false;
     private int sv_power = 15;
     private int ev_power = 15;
+    private int barHeight;
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
 
         cameraIntent = new Intent();
@@ -64,46 +67,47 @@ public class service_accessibility extends AccessibilityService implements View.
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getMetrics(dm);
 
-        ll = new LinearLayout(this);
-        ll.setOnTouchListener(this);
-        ll.addView(new Button(this));
-        create_button();
+        barHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, dm);
+        min = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, dm);
 
-        int flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, flags, PixelFormat.TRANSLUCENT);
-        switch (app.set.getString("gravity", "1")) {
-            case "0":
-                params.gravity = Gravity.START | Gravity.BOTTOM;
-                break;
-            case "2":
-                params.gravity = Gravity.END | Gravity.BOTTOM;
-                break;
-            default:
-                params.gravity = Gravity.CENTER | Gravity.BOTTOM;
-                break;
-        }
-
-        detector = new GestureDetectorCompat(this, gdl);
-        no_action = getResources().getString(R.string.no_gesture);
-    }
-
-    private void create_button() {
         s_power = app.set.getInt("shadow_power", 5);
         shadow = app.set.getBoolean("shadow", false);
         vibrate = app.set.getBoolean("vibrate", false);
         sv_power = app.set.getInt("vibrate_start_power", 15);
         ev_power = app.set.getInt("vibrate_end_power", 15);
-        b = (Button) ll.getChildAt(0);
-        b.setClickable(false);
-        b.setFocusable(false);
+        b = new Button(this);
         b.setBackground(setColor(app.set.getString("color", "#ffffff"), ContextCompat.getDrawable(this, R.drawable.less_rounded_corner)));
         b.setElevation(shadow ? s_power : 0);
-        int height = app.set.getInt("height", 30);
-        lllp = new LinearLayout.LayoutParams(app.set.getInt("width", 100), height);
-        int mar = app.set.getInt("margin", 5);
-        lllp.setMargins(mar,mar,mar,mar);
-        b.setLayoutParams(lllp);
+        b.setOnTouchListener(this);
+
+
+        params = new WindowManager.LayoutParams(app.set.getInt("width", 100), app.set.getInt("height", 30), 2038, 8, 1);
+        params.gravity = Gravity.START | Gravity.TOP;
+
+        setMargins(app.set.getInt("margin", 5));
+
+        detector = new GestureDetectorCompat(this, gdl);
+        no_action = getResources().getString(R.string.no_gesture);
+    }
+
+    private void setMargins(int mar) {
+        switch (app.set.getString("gravity", "1")) {
+            case "0":
+                defX = mar;
+                break;
+            case "2":
+                defX = dm.widthPixels - mar - params.width;
+                break;
+            default:
+                defX = (dm.widthPixels - params.width) / 2;
+                break;
+        }
+        defY = dm.heightPixels - barHeight - params.height - mar;
+
+        params.y = defY;
+        params.x = defX;
     }
 
     private void update_button(Intent i) {
@@ -112,17 +116,16 @@ public class service_accessibility extends AccessibilityService implements View.
                 b.setBackground(setColor(i.getStringExtra(EXTRA_PARAM), ContextCompat.getDrawable(this, R.drawable.less_rounded_corner)));
                 break;
             case "width":
-                lllp.width = i.getIntExtra(EXTRA_PARAM, 600);
-                b.setLayoutParams(lllp);
+                params.width = i.getIntExtra(EXTRA_PARAM, 600);
+                wm.updateViewLayout(b, params);
                 break;
             case "height":
-                lllp.height = i.getIntExtra(EXTRA_PARAM, 25);
-                b.setLayoutParams(lllp);
+                params.height = i.getIntExtra(EXTRA_PARAM, 25);
+                wm.updateViewLayout(b, params);
                 break;
             case "margin":
-                int qwe = i.getIntExtra(EXTRA_PARAM, 25);
-                lllp.setMargins(qwe,qwe,qwe,qwe);
-                b.setLayoutParams(lllp);
+                setMargins(i.getIntExtra(EXTRA_PARAM, 25));
+                wm.updateViewLayout(b, params);
                 break;
             case "shadow":
                 shadow = i.getBooleanExtra(EXTRA_PARAM, false);
@@ -155,7 +158,7 @@ public class service_accessibility extends AccessibilityService implements View.
                         break;
                 }
                 if(isEnabled)
-                    wm.updateViewLayout(ll, params);
+                    wm.updateViewLayout(b, params);
                 break;
         }
     }
@@ -170,30 +173,28 @@ public class service_accessibility extends AccessibilityService implements View.
         return background;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent != null && intent.getAction() != null)
             if(intent.getAction().equals(ACTION_UPDATE_SERVICE))
                 update_button(intent);
         return START_NOT_STICKY;
     }
 
-    @Override public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) { }
+    @Override public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+        accessibilityEvent.getAction();
+    }
     @Override public void onInterrupt() { }
     @Override public void onServiceConnected() {
         isEnabled = true;
         app.ops.startWatchingMode(AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, app.name, this);
-        if(app.check_alert()) {
-            wm.addView(ll, params);
-            sX = ll.getX();
-            sY = ll.getY();
-        }
+        if(app.check_alert())
+            wm.addView(b, params);
     }
 
     @Override public void onDestroy(){
         isEnabled = false;
         try {
-            wm.removeViewImmediate(ll);
+            wm.removeViewImmediate(b);
         } catch (Exception ignored) {}
         try {
             app.ops.stopWatchingMode(this);
@@ -201,27 +202,54 @@ public class service_accessibility extends AccessibilityService implements View.
     }
 
     float dX, dY, sX, sY;
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if(MotionEvent.ACTION_DOWN == event.getAction() && vibrate)
-            vibrator.vibrate(sv_power);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                dX = sX - event.getRawX();
-                dY = sY - event.getRawY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                ll.animate().x(event.getRawX() + dX).y(event.getRawY() + dY).setDuration(0).start();
-                break;
-            case MotionEvent.ACTION_UP:
-                ll.animate().x(sX).y(sY).setDuration(0).start();
-                break;
+    float min;
+    float max = 250;
+    boolean moving = false;
+    @Override public boolean onTouch(View v, MotionEvent e1) {
+        if(MotionEvent.ACTION_DOWN == e1.getAction()) {
+            int[] location = new int[2];
+            b.getLocationOnScreen(location);
+            sX = location[0];
+            sY = location[1];
+            dX = sX - e1.getRawX();
+            dY = sY - e1.getRawY();
+            if(vibrate)
+                vibrator.vibrate(sv_power);
+        } else if(MotionEvent.ACTION_MOVE == e1.getAction()) {
+            float newX = dX + e1.getRawX();
+            float newY = dY + e1.getRawY();
+
+            if (Math.abs(newX - sX) < min && Math.abs(newY - sY) < min && !moving) {
+            } else if (Math.abs(newX - sX) >= max && Math.abs(newY - sY) >= max && moving) {
+                double fi = Math.atan((newY - sY) / (newX - sX)) * 57.3 + (newX >= 0 ? 0 : 180);
+                if (fi < 23) do_action("right"); //left to right
+                else if (fi < 67) do_action("upright");  //left-up to right
+                else if (fi < 112) do_action("up"); //up to right
+                else if (fi < 157) do_action("upleft"); //right-up to right
+                else if (fi < 200) do_action("left"); //right to right
+                else if (fi > 337) do_action("right"); //left to right
+            } else {
+                params.x = (int) newX;
+                params.y = (int) newY;
+                wm.updateViewLayout(b, params);
+                moving = true;
+            }
+        } else if(MotionEvent.ACTION_UP == e1.getAction()) {
+            if(moving)
+                toHome();
         }
-        detector.onTouchEvent(event);
-        return true;
+        return detector.onTouchEvent(e1);
+    }
+
+    private void toHome() {
+        params.y = defY;
+        params.x = defX;
+        wm.updateViewLayout(b, params);
+        moving = false;
     }
 
     private void do_action(String str) {
+        toHome();
         int i = app.set.getInt(str, 0);
         if(vibrate)
             vibrator.vibrate(ev_power);
@@ -281,7 +309,8 @@ public class service_accessibility extends AccessibilityService implements View.
                         if(intent != null)
                             startActivity(intent.setFlags(FLAG_ACTIVITY_NEW_TASK));
                         else
-                            FancyToast.makeText(service_accessibility.this, "Не удалось запустить прложение", Toast.LENGTH_SHORT, FancyToast.WARNING).show();                    }
+                            FancyToast.makeText(service_accessibility.this, "Не удалось запустить прложение", Toast.LENGTH_SHORT, FancyToast.WARNING).show();
+                    }
                     break;
                 default:
                     FancyToast.makeText(service_accessibility.this, no_action, Toast.LENGTH_SHORT, FancyToast.INFO).show();
@@ -292,55 +321,35 @@ public class service_accessibility extends AccessibilityService implements View.
     }
 
     GestureDetector.SimpleOnGestureListener gdl = new GestureDetector.SimpleOnGestureListener() {
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
+        @Override public boolean onDoubleTap(MotionEvent e) {
             do_action("dtap");
             return true;
         }
 
-        @Override
-        public void onLongPress(MotionEvent e) {
+        @Override public void onLongPress(MotionEvent e) {
             super.onLongPress(e);
             do_action("ltap");
         }
 
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
+        @Override public boolean onSingleTapConfirmed(MotionEvent e) {
             do_action("tap");
-            return true;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            float w = ll.getWidth() / 2;
-            float x1 = e1.getX() - w;
-            float x2 = e2.getX() - w;
-            float y1 = -e1.getY();
-            float y2 = -e2.getY();
-            if (Math.abs(x2 - x1) > 50 || Math.abs(y2 - y1) > 50) {
-                ll.animate().x(sX).y(sY).setDuration(0).start();
-                double fi = Math.atan((y2 - y1) / (x2 - x1)) * 57.3 + (x2 >= 0 ? 0 : 180);
-                if (fi < 23) do_action("right"); //left to right
-                else if (fi < 67) do_action("upright");  //left-up to right
-                else if (fi < 112) do_action("up"); //up to right
-                else if (fi < 157) do_action("upleft"); //right-up to right
-                else if (fi < 200) do_action("left"); //right to right
-                else if (fi > 337) do_action("right"); //left to right
-            } else
-                return false;
             return true;
         }
     };
 
     @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onOpChanged(String s, String s1) {
+    @Override public void onOpChanged(String s, String s1) {
         if (s1.equals(app.name)) {
             try {
-                wm.removeViewImmediate(ll);
+                wm.removeViewImmediate(b);
             } catch (Exception ignored) {}
             if(app.check_alert())
-                wm.addView(ll, params);
+                wm.addView(b, params);
         }
+    }
+
+    @Override public void onAnimationUpdate(ValueAnimator p0) {
+        params.x = (int) p0.getAnimatedValue();
+        wm.updateViewLayout(b, params);
     }
 }
